@@ -67,9 +67,18 @@ public class EcumenicalPlugin extends Plugin {
 
 	public String generateOverlayText() {
 		StringBuilder message = new StringBuilder();
+
 		// Get current key count
-		int totalKeyCount = Integer.parseInt(configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalKeyCountInventory")) + Integer.parseInt(configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalKeyCountBank"));
-		message.append(totalKeyCount);
+		String inventoryCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalKeyCountInventory");
+		String bankCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalKeyCountBank");
+
+		if (bankCountStr == null || inventoryCountStr == null) {
+			return null;
+		}
+
+		int inventoryCount = Integer.parseInt(inventoryCountStr);
+		int bankCount = Integer.parseInt(bankCountStr);
+		message.append(inventoryCount + bankCount);
 
 		// Max key limit
 		int maxAmount = 3;
@@ -82,6 +91,7 @@ public class EcumenicalPlugin extends Plugin {
 
 		// Return tooltip
 		message.append(" keys collected");
+
 		return message.toString();
 	}
 }
