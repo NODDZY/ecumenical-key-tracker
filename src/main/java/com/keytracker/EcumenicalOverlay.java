@@ -32,17 +32,17 @@ public class EcumenicalOverlay extends Overlay {
 
         final MenuEntry menuEntry = menuEntries[menuSize - 1];
         final Widget widget = menuEntry.getWidget();
-        if(widget == null) {
+        if (widget == null) {
             return null;
         }
 
         int itemId = widget.getItemId();
-        if(itemId == -1) {
+        if (itemId == -1) {
             return null;
         }
 
-        // Only render when hovering ecumenical key item
-        if(itemId != ItemID.ECUMENICAL_KEY) {
+        // Only render when hovering ecumenical items
+        if (itemId != ItemID.ECUMENICAL_KEY && itemId != ItemID.ECUMENICAL_KEY_SHARD) {
             return null;
         }
 

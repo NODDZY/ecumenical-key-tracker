@@ -21,6 +21,11 @@ import static net.runelite.api.Varbits.DIARY_WILDERNESS_HARD;
 public class EcumenicalPlugin extends Plugin {
 	public static final String CONFIG_GROUP_NAME = "ecumenical-key-tracker";
 
+	public static final int SHARD_PER_KEY = 50;
+	public static final int DIARY_NO_AMOUNT = 3;
+	public static final int DIARY_MEDIUM_AMOUNT = 4;
+	public static final int DIARY_HARD_AMOUNT = 5;
+
 	@Inject
 	private Client client;
 
@@ -46,21 +51,26 @@ public class EcumenicalPlugin extends Plugin {
 	@Subscribe
 	public void onItemContainerChanged(ItemContainerChanged event) {
 		if (event.getContainerId() == InventoryID.INVENTORY.getId() || event.getContainerId() == InventoryID.BANK.getId()) {
-			// Check for ecumenical keys in bank or inventory
+			// Check for ecumenical keys/shards in bank or inventory
 			Item[] items = event.getItemContainer().getItems();
 			int tempKeyCount = 0;
+			int tempShardCount = 0;
 			for (Item item : items) {
 				if (item.getId() == ItemID.ECUMENICAL_KEY) {
 					tempKeyCount += item.getQuantity();
+				} else if (item.getId() == ItemID.ECUMENICAL_KEY_SHARD) {
+					tempShardCount += item.getQuantity();
 				}
 			}
-			// Store key count
+			// Store amount
 			if (event.getContainerId() == InventoryID.INVENTORY.getId())  {
 				log.debug("Keys in inventory: " + tempKeyCount);
 				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalKeyCountInventory", tempKeyCount);
+				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalShardCountInventory", tempShardCount);
 			} else {
 				log.debug("Keys in bank: " + tempKeyCount);
 				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalKeyCountBank", tempKeyCount);
+				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalShardCountBank", tempShardCount);
 			}
 		}
 	}
@@ -72,25 +82,33 @@ public class EcumenicalPlugin extends Plugin {
 		String inventoryCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalKeyCountInventory");
 		String bankCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalKeyCountBank");
 
+		// Get current shard count
+		String inventoryShardCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalShardCountInventory");
+		String bankShardCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalShardCountBank");
+
+		// Check if bank has been opened
 		if (bankCountStr == null || inventoryCountStr == null) {
 			return null;
 		}
 
-		int inventoryCount = Integer.parseInt(inventoryCountStr);
-		int bankCount = Integer.parseInt(bankCountStr);
-		message.append(inventoryCount + bankCount);
+		// Get totals as int
+		int totalKeyCount = Integer.parseInt(inventoryCountStr) + Integer.parseInt(bankCountStr);
+		int totalShardCount = Integer.parseInt(inventoryShardCountStr) + Integer.parseInt(bankShardCountStr);
 
 		// Max key limit
-		int maxAmount = 3;
+		int maxAmount = DIARY_NO_AMOUNT;
 		if (client.getVarbitValue(DIARY_WILDERNESS_HARD) == 1) {
-			maxAmount = 5;
+			maxAmount = DIARY_HARD_AMOUNT;
 		} else if (client.getVarbitValue(DIARY_WILDERNESS_MEDIUM) == 1) {
-			maxAmount = 4;
+			maxAmount = DIARY_MEDIUM_AMOUNT;
 		}
-		message.append("/").append(maxAmount);
 
-		// Return tooltip
-		message.append(" keys collected");
+		// Make tooltip message
+		message.append(totalKeyCount).append("/").append(maxAmount).append(" keys");
+		if (totalShardCount != 0) {
+			int shardAsKeys = totalShardCount / SHARD_PER_KEY;
+			message.append("</br>").append(totalShardCount).append(" (").append(shardAsKeys).append(") shards");
+		}
 
 		return message.toString();
 	}
