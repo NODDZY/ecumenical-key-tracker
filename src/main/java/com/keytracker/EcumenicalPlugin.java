@@ -19,12 +19,16 @@ import static net.runelite.api.Varbits.DIARY_WILDERNESS_HARD;
 	name = "Ecumenical Key Tracker"
 )
 public class EcumenicalPlugin extends Plugin {
-	public static final String CONFIG_GROUP_NAME = "ecumenical-key-tracker";
+	private static final String CONFIG_GROUP_NAME = "ecumenical-key-tracker";
+	private static final String CONFIG_KEY_INV = "ecumenicalKeyCountInventory";
+	private static final String CONFIG_KEY_BANK = "ecumenicalKeyCountBank";
+	private static final String CONFIG_SHARD_INV = "ecumenicalShardCountInventory";
+	private static final String CONFIG_SHARD_BANK = "ecumenicalShardCountBank";
 
-	public static final int SHARD_PER_KEY = 50;
-	public static final int DIARY_NO_AMOUNT = 3;
-	public static final int DIARY_MEDIUM_AMOUNT = 4;
-	public static final int DIARY_HARD_AMOUNT = 5;
+	private static final int SHARD_PER_KEY = 50;
+	private static final int DIARY_NO_AMOUNT = 3;
+	private static final int DIARY_MEDIUM_AMOUNT = 4;
+	private static final int DIARY_HARD_AMOUNT = 5;
 
 	@Inject
 	private Client client;
@@ -65,12 +69,12 @@ public class EcumenicalPlugin extends Plugin {
 			// Store amount
 			if (event.getContainerId() == InventoryID.INVENTORY.getId())  {
 				log.debug("Keys in inventory: " + tempKeyCount);
-				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalKeyCountInventory", tempKeyCount);
-				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalShardCountInventory", tempShardCount);
+				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_INV, tempKeyCount);
+				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_INV, tempShardCount);
 			} else {
 				log.debug("Keys in bank: " + tempKeyCount);
-				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalKeyCountBank", tempKeyCount);
-				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalShardCountBank", tempShardCount);
+				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_BANK, tempKeyCount);
+				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_BANK, tempShardCount);
 			}
 		}
 	}
@@ -79,12 +83,13 @@ public class EcumenicalPlugin extends Plugin {
 		StringBuilder message = new StringBuilder();
 
 		// Get current key count
-		String inventoryCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalKeyCountInventory");
-		String bankCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalKeyCountBank");
+		// TODO Dont get (and check) values from config every frame
+		String inventoryCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_INV);
+		String bankCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_BANK);
 
 		// Get current shard count
-		String inventoryShardCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalShardCountInventory");
-		String bankShardCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, "ecumenicalShardCountBank");
+		String inventoryShardCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_INV);
+		String bankShardCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_BANK);
 
 		// Check if bank has been opened
 		if (bankCountStr == null || inventoryCountStr == null) {
