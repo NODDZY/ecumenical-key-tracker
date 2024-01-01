@@ -67,6 +67,9 @@ public class EcumenicalPlugin extends Plugin {
 	@Override
 	public void shutDown() {
 		overlayManager.remove(overlay);
+		if (ecumenicalInfoBox != null) {
+			infoBoxManager.removeInfoBox(ecumenicalInfoBox);
+		}
 	}
 
 	@Subscribe
@@ -101,25 +104,15 @@ public class EcumenicalPlugin extends Plugin {
 		switch (gameStateChanged.getGameState()) {
 			case LOADING:
 				if (isInWildernessGodWarsDungeon()) {
-					ecumenicalInfoBox = new InfoBox(itemManager.getImage(ItemID.ECUMENICAL_KEY), this) {
-						@Override
-						public String getText() {
-							return null;
-						}
-
-						@Override
-						public Color getTextColor() {
-							return null;
-						}
-
-						@Override
-						public String getTooltip()
-						{
-							return generateOverlayText();
-						}
-					};
+					ecumenicalInfoBox = generateInfoBox();
 					infoBoxManager.addInfoBox(ecumenicalInfoBox);
 				} else {
+					infoBoxManager.removeInfoBox(ecumenicalInfoBox);
+				}
+				break;
+			case HOPPING:
+			case LOGIN_SCREEN:
+				if (ecumenicalInfoBox != null) {
 					infoBoxManager.removeInfoBox(ecumenicalInfoBox);
 				}
 				break;
@@ -130,7 +123,20 @@ public class EcumenicalPlugin extends Plugin {
 		return client.getMapRegions() != null && ArrayUtils.contains(client.getMapRegions(), WILDERNESS_GOD_WARS_DUNGEON_REGION_ID);
 	}
 
-	public String generateOverlayText() {
+	private int getMaxKeyAmount() {
+		if (client.getVarbitValue(DIARY_WILDERNESS_HARD) == 1) {
+			return DIARY_HARD_AMOUNT;
+		} else if (client.getVarbitValue(DIARY_WILDERNESS_MEDIUM) == 1) {
+			return DIARY_MEDIUM_AMOUNT;
+		}
+		return DIARY_NO_AMOUNT;
+	}
+
+	private int shardsToKeys(int shards) {
+		return shards / SHARD_PER_KEY;
+	}
+
+	public String generateInfoMessage() {
 		StringBuilder message = new StringBuilder();
 
 		// Get current key count
@@ -152,20 +158,33 @@ public class EcumenicalPlugin extends Plugin {
 		int totalShardCount = Integer.parseInt(inventoryShardCountStr) + Integer.parseInt(bankShardCountStr);
 
 		// Max key limit
-		int maxAmount = DIARY_NO_AMOUNT;
-		if (client.getVarbitValue(DIARY_WILDERNESS_HARD) == 1) {
-			maxAmount = DIARY_HARD_AMOUNT;
-		} else if (client.getVarbitValue(DIARY_WILDERNESS_MEDIUM) == 1) {
-			maxAmount = DIARY_MEDIUM_AMOUNT;
-		}
+		int maxAmount = getMaxKeyAmount();
 
 		// Make tooltip message
 		message.append(totalKeyCount).append("/").append(maxAmount).append(" keys");
 		if (totalShardCount != 0) {
-			int shardAsKeys = totalShardCount / SHARD_PER_KEY;
-			message.append("</br>").append(totalShardCount).append(" (").append(shardAsKeys).append(") shards");
+			message.append("</br>").append(totalShardCount).append(" (").append(shardsToKeys(totalShardCount)).append(") shards");
 		}
 
 		return message.toString();
+	}
+
+	private InfoBox generateInfoBox() {
+		return new InfoBox(itemManager.getImage(ItemID.ECUMENICAL_KEY), this) {
+			@Override
+			public String getText() {
+				return null;
+			}
+
+			@Override
+			public Color getTextColor() {
+				return Color.WHITE;
+			}
+
+			@Override
+			public String getTooltip() {
+				return generateInfoMessage();
+			}
+		};
 	}
 }

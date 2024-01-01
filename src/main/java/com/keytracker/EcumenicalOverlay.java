@@ -47,9 +47,9 @@ public class EcumenicalOverlay extends Overlay {
         }
 
         // Render tooltip
-        String overlayText = plugin.generateOverlayText();
+        String overlayText = plugin.generateInfoMessage();
         if (overlayText != null) {
-            tooltipManager.add(new Tooltip(plugin.generateOverlayText()));
+            tooltipManager.add(new Tooltip(plugin.generateInfoMessage()));
         }
         return null;
     }
