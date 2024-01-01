@@ -40,6 +40,9 @@ public class EcumenicalPlugin extends Plugin {
 	private static final int DIARY_HARD_AMOUNT = 5;
 
 	private InfoBox ecumenicalInfoBox;
+	
+	private int totalKeyCount;
+	private int totalShardCount;
 
 	@Inject
 	private Client client;
@@ -62,6 +65,7 @@ public class EcumenicalPlugin extends Plugin {
 	@Override
 	public void startUp() {
 		overlayManager.add(overlay);
+		updateCounts();
 	}
 
 	@Override
@@ -91,10 +95,12 @@ public class EcumenicalPlugin extends Plugin {
 				log.debug("Keys in inventory: " + tempKeyCount);
 				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_INV, tempKeyCount);
 				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_INV, tempShardCount);
+				updateCounts();
 			} else {
 				log.debug("Keys in bank: " + tempKeyCount);
 				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_BANK, tempKeyCount);
 				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_BANK, tempShardCount);
+				updateCounts();
 			}
 		}
 	}
@@ -138,26 +144,21 @@ public class EcumenicalPlugin extends Plugin {
 		return shards / SHARD_PER_KEY;
 	}
 
-	private int getTotalKeyCount() {
+	private void updateCounts() {
 		String inventoryCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_INV);
 		String bankCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_BANK);
+		totalKeyCount = parseIntSafely(inventoryCountStr) + parseIntSafely(bankCountStr);
 
-		return parseIntSafely(inventoryCountStr) + parseIntSafely(bankCountStr);
-	}
-
-	private int getTotalShardCount() {
 		String inventoryShardCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_INV);
 		String bankShardCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_BANK);
-
-		return parseIntSafely(inventoryShardCountStr) + parseIntSafely(bankShardCountStr);
+		totalShardCount = parseIntSafely(inventoryShardCountStr) + parseIntSafely(bankShardCountStr);
 	}
 
 	public String generateInfoMessage() {
-		int totalShardCount = getTotalShardCount();
 		StringBuilder message = new StringBuilder();
 
 		// Construct tooltip message
-		message.append(getTotalKeyCount()).append("/").append(getMaxKeyAmount()).append(" keys");
+		message.append(totalKeyCount).append("/").append(getMaxKeyAmount()).append(" keys");
 		if (totalShardCount != 0) {
 			message.append("</br>").append(totalShardCount).append(" (").append(shardsToKeys(totalShardCount)).append(") shards");
 		}
@@ -166,7 +167,6 @@ public class EcumenicalPlugin extends Plugin {
 	}
 
 	private InfoBox generateInfoBox() {
-		int totalKeyCount = getTotalKeyCount();
 		return new InfoBox(itemManager.getImage(ItemID.ECUMENICAL_KEY), this) {
 			@Override
 			public String getText() {
