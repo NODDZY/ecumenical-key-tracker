@@ -103,6 +103,7 @@ public class EcumenicalPlugin extends Plugin {
 	public void onGameStateChanged(GameStateChanged gameStateChanged) {
 		switch (gameStateChanged.getGameState()) {
 			case LOADING:
+				// Display infobox when in the Wilderness God Wars Dungeon
 				if (isInWildernessGodWarsDungeon()) {
 					ecumenicalInfoBox = generateInfoBox();
 					infoBoxManager.addInfoBox(ecumenicalInfoBox);
@@ -112,6 +113,7 @@ public class EcumenicalPlugin extends Plugin {
 				break;
 			case HOPPING:
 			case LOGIN_SCREEN:
+				// Prevent duplicate infoboxes when hopping/logging
 				if (ecumenicalInfoBox != null) {
 					infoBoxManager.removeInfoBox(ecumenicalInfoBox);
 				}
@@ -136,32 +138,26 @@ public class EcumenicalPlugin extends Plugin {
 		return shards / SHARD_PER_KEY;
 	}
 
-	public String generateInfoMessage() {
-		StringBuilder message = new StringBuilder();
-
-		// Get current key count
-		// TODO Dont get (and check) values from config every frame
+	private int getTotalKeyCount() {
 		String inventoryCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_INV);
 		String bankCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_BANK);
 
-		// Get current shard count
+		return parseIntSafely(inventoryCountStr) + parseIntSafely(bankCountStr);
+	}
+
+	private int getTotalShardCount() {
 		String inventoryShardCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_INV);
 		String bankShardCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_BANK);
 
-		// Check if bank has been opened
-		if (bankCountStr == null || inventoryCountStr == null) {
-			return null;
-		}
+		return parseIntSafely(inventoryShardCountStr) + parseIntSafely(bankShardCountStr);
+	}
 
-		// Get totals as int
-		int totalKeyCount = Integer.parseInt(inventoryCountStr) + Integer.parseInt(bankCountStr);
-		int totalShardCount = Integer.parseInt(inventoryShardCountStr) + Integer.parseInt(bankShardCountStr);
+	public String generateInfoMessage() {
+		int totalShardCount = getTotalShardCount();
+		StringBuilder message = new StringBuilder();
 
-		// Max key limit
-		int maxAmount = getMaxKeyAmount();
-
-		// Make tooltip message
-		message.append(totalKeyCount).append("/").append(maxAmount).append(" keys");
+		// Construct tooltip message
+		message.append(getTotalKeyCount()).append("/").append(getMaxKeyAmount()).append(" keys");
 		if (totalShardCount != 0) {
 			message.append("</br>").append(totalShardCount).append(" (").append(shardsToKeys(totalShardCount)).append(") shards");
 		}
@@ -170,14 +166,20 @@ public class EcumenicalPlugin extends Plugin {
 	}
 
 	private InfoBox generateInfoBox() {
+		int totalKeyCount = getTotalKeyCount();
 		return new InfoBox(itemManager.getImage(ItemID.ECUMENICAL_KEY), this) {
 			@Override
 			public String getText() {
-				return null;
+				return String.valueOf(totalKeyCount);
 			}
 
 			@Override
 			public Color getTextColor() {
+				if (totalKeyCount >= getMaxKeyAmount()) {
+					return Color.GREEN.darker();
+				} else if (totalKeyCount <= 0) {
+					return Color.RED.darker();
+				}
 				return Color.WHITE;
 			}
 
@@ -186,5 +188,13 @@ public class EcumenicalPlugin extends Plugin {
 				return generateInfoMessage();
 			}
 		};
+	}
+
+	private int parseIntSafely(String value) {
+		try {
+			return (value != null) ? Integer.parseInt(value) : 0;
+		} catch (NumberFormatException e) {
+			return 0;
+		}
 	}
 }
