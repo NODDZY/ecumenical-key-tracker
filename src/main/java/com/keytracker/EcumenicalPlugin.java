@@ -40,7 +40,7 @@ public class EcumenicalPlugin extends Plugin {
 	private static final int DIARY_HARD_AMOUNT = 5;
 
 	private InfoBox ecumenicalInfoBox;
-	
+
 	private int totalKeyCount;
 	private int totalShardCount;
 
@@ -90,14 +90,14 @@ public class EcumenicalPlugin extends Plugin {
 					tempShardCount += item.getQuantity();
 				}
 			}
-			// Store amount
+			// Store amount using config file and in class variables
 			if (event.getContainerId() == InventoryID.INVENTORY.getId())  {
-				log.debug("Keys in inventory: " + tempKeyCount);
+				log.debug("In inventory: {} key(s), {} shard(s)", tempKeyCount, tempShardCount);
 				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_INV, tempKeyCount);
 				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_INV, tempShardCount);
 				updateCounts();
 			} else {
-				log.debug("Keys in bank: " + tempKeyCount);
+				log.debug("Banked: {} key(s), {} shard(s)", tempKeyCount, tempShardCount);
 				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_BANK, tempKeyCount);
 				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_BANK, tempShardCount);
 				updateCounts();
@@ -108,19 +108,24 @@ public class EcumenicalPlugin extends Plugin {
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged) {
 		switch (gameStateChanged.getGameState()) {
-			case LOADING:
+			case LOGGED_IN:
 				// Display infobox when in the Wilderness God Wars Dungeon
 				if (isInWildernessGodWarsDungeon()) {
+					log.debug("In Wilderness God Wars Dungeon. Adding InfoBox...");
 					ecumenicalInfoBox = generateInfoBox();
 					infoBoxManager.addInfoBox(ecumenicalInfoBox);
 				} else {
-					infoBoxManager.removeInfoBox(ecumenicalInfoBox);
+					if (ecumenicalInfoBox != null) {
+						log.debug("Not in Wilderness God Wars Dungeon anymore. Removing InfoBox...");
+						infoBoxManager.removeInfoBox(ecumenicalInfoBox);
+					}
 				}
 				break;
 			case HOPPING:
 			case LOGIN_SCREEN:
 				// Prevent duplicate infoboxes when hopping/logging
 				if (ecumenicalInfoBox != null) {
+					log.debug("Removing InfoBox to prevent duplicates");
 					infoBoxManager.removeInfoBox(ecumenicalInfoBox);
 				}
 				break;
@@ -145,6 +150,7 @@ public class EcumenicalPlugin extends Plugin {
 	}
 
 	private void updateCounts() {
+		// Get ecumenical amounts from config file and update the class variables
 		String inventoryCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_INV);
 		String bankCountStr = configManager.getRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_BANK);
 		totalKeyCount = parseIntSafely(inventoryCountStr) + parseIntSafely(bankCountStr);
@@ -176,9 +182,9 @@ public class EcumenicalPlugin extends Plugin {
 			@Override
 			public Color getTextColor() {
 				if (totalKeyCount >= getMaxKeyAmount()) {
-					return Color.GREEN.darker();
+					return Color.GREEN;
 				} else if (totalKeyCount <= 0) {
-					return Color.RED.darker();
+					return Color.RED;
 				}
 				return Color.WHITE;
 			}
