@@ -121,6 +121,7 @@ public class EcumenicalPlugin extends Plugin {
 					}
 				}
 				break;
+			case CONNECTION_LOST:
 			case HOPPING:
 			case LOGIN_SCREEN:
 				// Prevent duplicate infoboxes when hopping/logging
