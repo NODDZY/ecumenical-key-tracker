@@ -23,7 +23,9 @@ import static net.runelite.api.Varbits.DIARY_WILDERNESS_HARD;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Ecumenical Key Tracker"
+	name = "Ecumenical Key Tracker",
+	description = "Tracks ecumenical keys in inventory and bank",
+	tags = { "ecumenical", "key", "track", "gwd" }
 )
 public class EcumenicalPlugin extends Plugin {
 	private static final String CONFIG_GROUP_NAME = "ecumenical-key-tracker";
