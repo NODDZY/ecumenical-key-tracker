@@ -91,26 +91,20 @@ public class EcumenicalPlugin extends Plugin {
 	public void onItemContainerChanged(ItemContainerChanged event) {
 		if (event.getContainerId() == InventoryID.INVENTORY.getId() || event.getContainerId() == InventoryID.BANK.getId()) {
 			// Check for ecumenical keys/shards in bank or inventory
-			Item[] items = event.getItemContainer().getItems();
-			int tempKeyCount = 0;
-			int tempShardCount = 0;
-			for (Item item : items) {
-				if (item.getId() == ItemID.ECUMENICAL_KEY) {
-					tempKeyCount += item.getQuantity();
-				} else if (item.getId() == ItemID.ECUMENICAL_KEY_SHARD) {
-					tempShardCount += item.getQuantity();
-				}
-			}
+			ItemContainer container = event.getItemContainer();
+			int keyCount = container.count(ItemID.ECUMENICAL_KEY);
+			int shardCount = container.count(ItemID.ECUMENICAL_KEY_SHARD);
+
 			// Store amount using config file and in class variables
 			if (event.getContainerId() == InventoryID.INVENTORY.getId())  {
-				log.debug("In inventory: {} key(s), {} shard(s)", tempKeyCount, tempShardCount);
-				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_INV, tempKeyCount);
-				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_INV, tempShardCount);
+				log.debug("In inventory: {} key(s), {} shard(s)", keyCount, shardCount);
+				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_INV, keyCount);
+				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_INV, shardCount);
 				updateCounts();
 			} else {
-				log.debug("Banked: {} key(s), {} shard(s)", tempKeyCount, tempShardCount);
-				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_BANK, tempKeyCount);
-				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_BANK, tempShardCount);
+				log.debug("Banked: {} key(s), {} shard(s)", keyCount, shardCount);
+				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_BANK, keyCount);
+				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_BANK, shardCount);
 				updateCounts();
 			}
 		}
