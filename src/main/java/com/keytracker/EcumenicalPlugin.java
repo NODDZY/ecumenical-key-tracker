@@ -26,7 +26,7 @@ import static net.runelite.api.Varbits.DIARY_WILDERNESS_MEDIUM;
 @PluginDescriptor(
 	name = "Ecumenical Key Tracker",
 	description = "Tracks ecumenical keys in inventory and bank",
-	tags = { "ecumenical", "key", "track", "gwd" }
+	tags = { "ecumenical", "key", "tracking", "gwd" }
 )
 public class EcumenicalPlugin extends Plugin {
 	private static final String CONFIG_GROUP_NAME = "ecumenical-key-tracker";
@@ -133,7 +133,7 @@ public class EcumenicalPlugin extends Plugin {
 			if (configChanged.getKey().equals("showShardCount")) {
 				return;
 			}
-
+			// Redraw infobox if needed
 			if (client.getGameState().equals(GameState.LOGGED_IN)) {
 				displayInfobox();
 			}
@@ -227,6 +227,7 @@ public class EcumenicalPlugin extends Plugin {
 	}
 
 	private int parseIntSafely(String value) {
+		// Return 0 if ecumenical count is not set in config file
 		try {
 			return (value != null) ? Integer.parseInt(value) : 0;
 		} catch (NumberFormatException e) {
