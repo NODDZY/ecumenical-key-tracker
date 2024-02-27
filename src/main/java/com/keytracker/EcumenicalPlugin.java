@@ -43,30 +43,16 @@ public class EcumenicalPlugin extends Plugin {
 	private static final int DIARY_HARD_AMOUNT = 5;
 
 	private InfoBox ecumenicalInfoBox;
-
 	private int totalKeyCount;
 	private int totalShardCount;
 
-	@Inject
-	private Client client;
-
-	@Inject
-	private OverlayManager overlayManager;
-
-	@Inject
-	private ConfigManager configManager;
-
-	@Inject
-	private EcumenicalConfig ecumenicalConfig;
-
-	@Inject
-	private EcumenicalOverlay overlay;
-
-	@Inject
-	private InfoBoxManager infoBoxManager;
-
-	@Inject
-	private ItemManager itemManager;
+	@Inject private Client client;
+	@Inject private ItemManager itemManager;
+	@Inject private ConfigManager configManager;
+	@Inject private OverlayManager overlayManager;
+	@Inject private EcumenicalConfig ecumenicalConfig;
+	@Inject private EcumenicalOverlay ecumenicalOverlay;
+	@Inject private InfoBoxManager infoBoxManager;
 
 	@Provides
 	EcumenicalConfig provideConfig(ConfigManager configManager) {
@@ -75,13 +61,13 @@ public class EcumenicalPlugin extends Plugin {
 
 	@Override
 	public void startUp() {
-		overlayManager.add(overlay);
+		overlayManager.add(ecumenicalOverlay);
 		updateCounts();
 	}
 
 	@Override
 	public void shutDown() {
-		overlayManager.remove(overlay);
+		overlayManager.remove(ecumenicalOverlay);
 		if (ecumenicalInfoBox != null) {
 			infoBoxManager.removeInfoBox(ecumenicalInfoBox);
 		}
@@ -193,14 +179,12 @@ public class EcumenicalPlugin extends Plugin {
 	}
 
 	public String generateInfoMessage() {
-		StringBuilder message = new StringBuilder();
-
 		// Construct tooltip message
+		StringBuilder message = new StringBuilder();
 		message.append(totalKeyCount).append("/").append(getMaxKeyAmount()).append(" keys");
 		if (ecumenicalConfig.showShardCount() && totalShardCount != 0) {
 			message.append("</br>").append(totalShardCount).append(" (").append(shardsToKeys(totalShardCount)).append(") shards");
 		}
-
 		return message.toString();
 	}
 

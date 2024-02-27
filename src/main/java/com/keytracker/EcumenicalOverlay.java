@@ -1,6 +1,5 @@
 package com.keytracker;
 
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.ItemID;
 import net.runelite.api.MenuEntry;
@@ -12,20 +11,14 @@ import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 import javax.inject.Inject;
 import java.awt.*;
 
-@Slf4j
 public class EcumenicalOverlay extends Overlay {
-    @Inject
-    private Client client;
-
-    @Inject
-    private TooltipManager tooltipManager;
-
-    @Inject
-    private EcumenicalPlugin plugin;
+    @Inject private Client client;
+    @Inject private TooltipManager tooltipManager;
+    @Inject private EcumenicalPlugin plugin;
 
     @Override
     public Dimension render(Graphics2D graphics) {
-        // Get idemId from current menu
+        // Get itemId from current menu
         final MenuEntry[] menuEntries = client.getMenuEntries();
         final int menuSize = menuEntries.length;
         if (menuSize == 0) {
@@ -43,7 +36,7 @@ public class EcumenicalOverlay extends Overlay {
             return null;
         }
 
-        // Only render when hovering ecumenical items
+        // Only render while hovering ecumenical items
         if (itemId != ItemID.ECUMENICAL_KEY && itemId != ItemID.ECUMENICAL_KEY_SHARD) {
             return null;
         }
