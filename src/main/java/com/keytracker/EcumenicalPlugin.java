@@ -96,17 +96,18 @@ public class EcumenicalPlugin extends Plugin {
 			int shardCount = container.count(ItemID.ECUMENICAL_KEY_SHARD);
 
 			// Store amount using config file and in class variables
-			if (event.getContainerId() == InventoryID.INVENTORY.getId())  {
+			if (container.getId() == InventoryID.INVENTORY.getId())  {
 				log.debug("In inventory: {} key(s), {} shard(s)", keyCount, shardCount);
 				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_INV, keyCount);
 				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_INV, shardCount);
-				updateCounts();
-			} else {
+			}
+			if (container.getId() == InventoryID.BANK.getId()) {
 				log.debug("Banked: {} key(s), {} shard(s)", keyCount, shardCount);
 				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_KEY_BANK, keyCount);
 				configManager.setRSProfileConfiguration(CONFIG_GROUP_NAME, CONFIG_SHARD_BANK, shardCount);
-				updateCounts();
 			}
+			// Update class variables with new values
+			updateCounts();
 		}
 	}
 
@@ -145,20 +146,21 @@ public class EcumenicalPlugin extends Plugin {
 			infoBoxManager.removeInfoBox(ecumenicalInfoBox);
 		}
 
-		// Infobox is turned off
-		if (!ecumenicalConfig.displayInfobox()) {
-			return;
-		}
-		// Display infobox everywhere
-		if (!ecumenicalConfig.onlyDisplayWhileInDungeon()) {
-			ecumenicalInfoBox = generateInfoBox();
-			infoBoxManager.addInfoBox(ecumenicalInfoBox);
-			return;
-		}
-		// Display infobox only while inside the Wilderness God Wars Dungeon
-		if (isInWildernessGodWarsDungeon()) {
-			ecumenicalInfoBox = generateInfoBox();
-			infoBoxManager.addInfoBox(ecumenicalInfoBox);
+		// Infobox is turned on
+		if (ecumenicalConfig.displayInfobox()) {
+			// Update class variables (for the initial infobox to have the correct amount)
+			updateCounts();
+			// Display infobox everywhere
+			if (!ecumenicalConfig.onlyDisplayWhileInDungeon()) {
+				ecumenicalInfoBox = generateInfoBox();
+				infoBoxManager.addInfoBox(ecumenicalInfoBox);
+				return;
+			}
+			// Display infobox only while inside the Wilderness God Wars Dungeon
+			if (isInWildernessGodWarsDungeon()) {
+				ecumenicalInfoBox = generateInfoBox();
+				infoBoxManager.addInfoBox(ecumenicalInfoBox);
+			}
 		}
     }
 
