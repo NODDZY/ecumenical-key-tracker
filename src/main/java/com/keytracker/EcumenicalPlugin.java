@@ -14,7 +14,6 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.infobox.InfoBox;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
-import org.apache.commons.lang3.ArrayUtils;
 
 import javax.inject.Inject;
 import java.awt.*;
@@ -151,7 +150,10 @@ public class EcumenicalPlugin extends Plugin {
     }
 
     private boolean isInWildernessGodWarsDungeon() {
-        return client.getMapRegions() != null && ArrayUtils.contains(client.getMapRegions(), WILDERNESS_GOD_WARS_DUNGEON_REGION_ID);
+        if (client.getLocalPlayer() == null || client.getLocalPlayer().getWorldLocation() == null) {
+            return false;
+        }
+        return client.getLocalPlayer().getWorldLocation().getRegionID() == WILDERNESS_GOD_WARS_DUNGEON_REGION_ID;
     }
 
     private int getMaxKeyAmount() {
